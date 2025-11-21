@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Building2, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { ResultsDisplay } from "@/components/ResultsDisplay";
 
 interface Heir {
   id: string;
@@ -38,6 +39,9 @@ const Calculator = () => {
     ));
   };
 
+  const [showResults, setShowResults] = useState(false);
+  const [calculationResult, setCalculationResult] = useState<any>(null);
+
   const handleCalculate = () => {
     if (!estateValue || parseFloat(estateValue) <= 0) {
       toast.error("Please enter a valid estate value");
@@ -50,8 +54,20 @@ const Calculator = () => {
       return;
     }
 
-    // For MVP, show a placeholder message
-    toast.info("Calculation feature coming soon! This will integrate with Sharia inheritance calculation engine.");
+    // Import and use the calculation engine
+    import("@/lib/shariaCalculator").then(({ calculateInheritance }) => {
+      const result = calculateInheritance(parseFloat(estateValue), heirs);
+      setCalculationResult(result);
+      setShowResults(true);
+      toast.success("Calculation completed successfully!");
+    });
+  };
+
+  const handleNewCalculation = () => {
+    setShowResults(false);
+    setCalculationResult(null);
+    setEstateValue("");
+    setHeirs([{ id: "1", name: "", relationship: "", gender: "" }]);
   };
 
   return (
@@ -76,6 +92,13 @@ const Calculator = () => {
       {/* Calculator Section */}
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
+          {showResults && calculationResult ? (
+            <ResultsDisplay 
+              calculation={calculationResult} 
+              onNewCalculation={handleNewCalculation}
+            />
+          ) : (
+            <>
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-foreground mb-3">
               Estate Calculator
@@ -212,6 +235,8 @@ const Calculator = () => {
               <li>• Generates court-ready documentation for Egyptian legal system</li>
             </ul>
           </Card>
+          </>
+          )}
         </div>
       </div>
     </div>

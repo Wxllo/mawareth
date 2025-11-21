@@ -52,9 +52,11 @@ const Index = () => {
               <span className="text-xl font-bold text-foreground">Mawareth</span>
             </div>
             <div className="flex gap-3">
-              <Button variant="ghost" onClick={() => navigate('/calculator')}>
-                Calculator
-              </Button>
+              <Button variant="ghost" onClick={() => navigate('/about')}>About</Button>
+              <Button variant="ghost" onClick={() => navigate('/pricing')}>Pricing</Button>
+              <Button variant="ghost" onClick={() => navigate('/blog')}>Blog</Button>
+              <Button variant="ghost" onClick={() => navigate('/faq')}>FAQ</Button>
+              <Button variant="ghost" onClick={() => navigate('/contact')}>Contact</Button>
               <Button onClick={() => navigate('/calculator')}>Get Started</Button>
             </div>
           </div>
