@@ -53,6 +53,10 @@ const FIXED_SHARES = {
   sister_full_multiple: 2 / 3,
   sister_paternal_single: 1 / 2,
   sister_paternal_multiple: 2 / 3,
+  
+  // Maternal (uterine) siblings shares
+  uterine_sibling_single: 1 / 6,
+  uterine_siblings_multiple: 1 / 3,
 };
 
 export function calculateInheritance(estateValue: number, heirs: Heir[]): EstateCalculation {
@@ -241,10 +245,51 @@ export function calculateInheritance(estateValue: number, heirs: Heir[]): Estate
     }
   }
   
+  // Handle maternal (uterine) siblings first - they get fixed shares
+  const maternalSiblings = heirs.filter(h => 
+    h.relationship === 'stepbrother_maternal' || h.relationship === 'stepsister_maternal'
+  );
+  
+  if (maternalSiblings.length > 0) {
+    const share = maternalSiblings.length === 1 
+      ? FIXED_SHARES.uterine_sibling_single 
+      : FIXED_SHARES.uterine_siblings_multiple / maternalSiblings.length;
+    const basis = maternalSiblings.length === 1
+      ? 'Maternal sibling receives 1/6 (Quran 4:12)'
+      : 'Maternal siblings share 1/3 equally (Quran 4:12)';
+    
+    maternalSiblings.forEach(sibling => {
+      results.push({
+        heirId: sibling.id,
+        name: sibling.name,
+        relationship: sibling.relationship,
+        share,
+        percentage: share * 100,
+        amount: estateValue * share,
+        basis,
+      });
+      allocatedShares += share;
+    });
+  }
+  
+  // Stepmother does NOT inherit
+  const stepmother = heirs.find(h => h.relationship === 'stepmother');
+  if (stepmother) {
+    results.push({
+      heirId: stepmother.id,
+      name: stepmother.name,
+      relationship: stepmother.relationship,
+      share: 0,
+      percentage: 0,
+      amount: 0,
+      basis: 'Stepmother does not inherit under Islamic law',
+    });
+  }
+  
   // Calculate siblings shares (if no children exist)
   if (!hasChildren && !hasFather) {
-    const brothers = heirs.filter(h => h.relationship === 'brother');
-    const sisters = heirs.filter(h => h.relationship === 'sister');
+    const brothers = heirs.filter(h => h.relationship === 'brother' || h.relationship === 'stepbrother_paternal');
+    const sisters = heirs.filter(h => h.relationship === 'sister' || h.relationship === 'stepsister_paternal');
     const remainingShare = 1 - allocatedShares;
     
     if (brothers.length > 0 || sisters.length > 0) {
