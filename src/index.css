@@ -4,10 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
     --background: 210 20% 98%;
@@ -19,7 +15,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
-    --primary: 185 75% 35%;
+    --primary: 152 82% 16%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 20% 95%;
@@ -28,31 +24,33 @@ All colors MUST be HSL.
     --muted: 210 20% 95%;
     --muted-foreground: 215 15% 45%;
 
-    --accent: 35 90% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 43 74% 53%;
+    --accent-foreground: 152 82% 16%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 215 20% 88%;
     --input: 215 20% 88%;
-    --ring: 185 75% 35%;
+    --ring: 152 82% 16%;
 
     --radius: 0.75rem;
 
+    /* Custom colors */
+    --emerald: 152 82% 16%;
+    --emerald-dark: 152 82% 10%;
+    --emerald-foreground: 0 0% 100%;
+    --gold: 43 74% 53%;
     --trust-blue: 200 80% 45%;
-    --warm-gold: 35 90% 55%;
     --success-green: 142 76% 36%;
     
-    --gradient-primary: linear-gradient(135deg, hsl(185 75% 35%), hsl(200 80% 45%));
-    --gradient-accent: linear-gradient(135deg, hsl(35 90% 55%), hsl(25 85% 50%));
-    --gradient-hero: linear-gradient(165deg, hsl(185 75% 35% / 0.05), hsl(35 90% 55% / 0.05));
+    --gradient-primary: linear-gradient(135deg, hsl(152 82% 16%), hsl(152 82% 22%));
+    --gradient-accent: linear-gradient(135deg, hsl(43 74% 53%), hsl(35 85% 50%));
+    --gradient-hero: linear-gradient(165deg, hsl(152 82% 16% / 0.05), hsl(43 74% 53% / 0.05));
     
     --shadow-soft: 0 2px 10px hsl(215 25% 15% / 0.06);
     --shadow-medium: 0 4px 20px hsl(215 25% 15% / 0.1);
     --shadow-strong: 0 8px 30px hsl(215 25% 15% / 0.15);
-
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
@@ -65,7 +63,7 @@ All colors MUST be HSL.
     --popover: 215 28% 12%;
     --popover-foreground: 210 20% 98%;
 
-    --primary: 185 70% 45%;
+    --primary: 152 70% 35%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 25% 18%;
@@ -74,7 +72,7 @@ All colors MUST be HSL.
     --muted: 215 25% 18%;
     --muted-foreground: 215 15% 60%;
 
-    --accent: 35 90% 55%;
+    --accent: 43 74% 53%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
@@ -82,11 +80,11 @@ All colors MUST be HSL.
 
     --border: 215 25% 20%;
     --input: 215 25% 20%;
-    --ring: 185 70% 45%;
+    --ring: 152 70% 35%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(185 70% 45%), hsl(200 75% 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(35 90% 55%), hsl(25 85% 50%));
-    --gradient-hero: linear-gradient(165deg, hsl(185 70% 45% / 0.1), hsl(35 90% 55% / 0.1));
+    --emerald: 152 70% 35%;
+    --emerald-dark: 152 70% 20%;
+    --emerald-foreground: 0 0% 100%;
   }
 }
 
@@ -96,30 +94,11 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-cairo;
   }
 
-  /* RTL Support for Arabic */
   [dir="rtl"] {
     direction: rtl;
     text-align: right;
-  }
-
-  [dir="rtl"] body {
-    font-family: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-
-  [dir="ltr"] body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-  }
-
-  /* RTL specific adjustments */
-  [dir="rtl"] .flex-row-reverse {
-    flex-direction: row-reverse;
-  }
-
-  [dir="rtl"] .space-x-reverse > * + * {
-    margin-right: var(--tw-space-x-reverse);
-    margin-left: 0;
   }
 }
