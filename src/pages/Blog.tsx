@@ -26,7 +26,7 @@ const Blog = () => {
     {
       title: "Estate Liquidity Solutions: Breaking the Inheritance Freeze",
       excerpt: "Explore how bank partnerships and buyout financing can help families resolve property inheritance disputes without years of waiting.",
-      author: "Ahmed Hassan",
+      author: "Mohammed Waleed",
       date: "March 5, 2025",
       category: "Financial Solutions",
       readTime: "10 min read",
@@ -74,7 +74,7 @@ const Blog = () => {
     {
       title: "Case Study: How One Family Resolved a 5-Year Property Dispute",
       excerpt: "Real story of an Egyptian family that used Mawareth and liquidity solutions to end a half-decade standoff over an inherited apartment.",
-      author: "Ahmed Hassan",
+      author: "Mohammed Waleed",
       date: "January 30, 2025",
       category: "Case Studies",
       readTime: "11 min read",

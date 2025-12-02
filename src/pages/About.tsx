@@ -31,7 +31,7 @@ const About = () => {
 
   const team = [
     {
-      name: "Ahmed Hassan",
+      name: "Mohammed Waleed",
       role: "Founder & CEO",
       description: "Islamic Finance Expert with 15+ years experience",
     },
@@ -100,7 +100,7 @@ const About = () => {
             </h2>
             <Card className="p-8 shadow-medium">
               <p className="text-lg text-muted-foreground leading-relaxed mb-4">
-                Mawareth was born from a personal crisis. Our founder, Ahmed Hassan, watched his own family 
+                Mawareth was born from a personal crisis. Our founder, Mohammed Waleed, watched his own family 
                 struggle for three years to divide an inherited apartment. Three siblings couldn't agree, 
                 none had cash to buy the others out, and the property sat empty while legal fees mounted.
               </p>
