@@ -4,6 +4,8 @@ import { Download, Share2 } from "lucide-react";
 import { EstateCalculation, formatCurrency, formatPercentage, formatFraction } from "@/lib/shariaCalculator";
 import { generatePDF } from "@/lib/pdfGenerator";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/i18n";
 
 interface ResultsDisplayProps {
   calculation: EstateCalculation;
@@ -11,12 +13,15 @@ interface ResultsDisplayProps {
 }
 
 export const ResultsDisplay = ({ calculation, onNewCalculation }: ResultsDisplayProps) => {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   const handleDownloadPDF = () => {
     try {
       generatePDF(calculation);
-      toast.success("PDF generated successfully!");
+      toast.success(language === 'ar' ? "تم إنشاء PDF بنجاح!" : "PDF generated successfully!");
     } catch (error) {
-      toast.error("Failed to generate PDF");
+      toast.error(language === 'ar' ? "فشل في إنشاء PDF" : "Failed to generate PDF");
     }
   };
 
@@ -40,22 +45,22 @@ export const ResultsDisplay = ({ calculation, onNewCalculation }: ResultsDisplay
       <Card className="p-6 bg-gradient-primary/10 border-primary/20">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-foreground mb-2">
-            Calculation Complete
+            {t.calculationComplete}
           </h2>
           <p className="text-muted-foreground mb-4">
-            According to Sharia Inheritance Law
+            {language === 'ar' ? 'وفقاً لأحكام الشريعة الإسلامية' : 'According to Sharia Inheritance Law'}
           </p>
           <div className="text-4xl font-bold text-foreground mb-2">
             {formatCurrency(calculation.totalEstate)}
           </div>
-          <p className="text-sm text-muted-foreground">Total Estate Value</p>
+          <p className="text-sm text-muted-foreground">{t.estateValue}</p>
         </div>
       </Card>
 
       {/* Heirs Results */}
       <div className="space-y-4">
         <h3 className="text-xl font-semibold text-foreground">
-          Inheritance Distribution
+          {t.inheritanceDistribution}
         </h3>
         
         {calculation.results.map((result) => (
@@ -81,7 +86,7 @@ export const ResultsDisplay = ({ calculation, onNewCalculation }: ResultsDisplay
             
             <div className="bg-muted/50 p-3 rounded-lg">
               <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">Legal Basis:</span> {result.basis}
+                <span className="font-semibold text-foreground">{t.legalBasis}:</span> {result.basis}
               </p>
             </div>
           </Card>
@@ -109,7 +114,7 @@ export const ResultsDisplay = ({ calculation, onNewCalculation }: ResultsDisplay
       <div className="flex gap-4">
         <Button onClick={handleDownloadPDF} className="flex-1" size="lg">
           <Download className="w-4 h-4 mr-2" />
-          Download PDF
+          {t.downloadPDF}
         </Button>
         <Button onClick={handleShare} variant="outline" size="lg">
           <Share2 className="w-4 h-4 mr-2" />
@@ -118,7 +123,7 @@ export const ResultsDisplay = ({ calculation, onNewCalculation }: ResultsDisplay
       </div>
 
       <Button onClick={onNewCalculation} variant="ghost" className="w-full">
-        Start New Calculation
+        {t.startNewCalculation}
       </Button>
 
       {/* Legal Disclaimer */}
