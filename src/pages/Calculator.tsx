@@ -8,6 +8,8 @@ import { Building2, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ResultsDisplay } from "@/components/ResultsDisplay";
+import { ShariaExplainer } from "@/components/ShariaExplainer";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 interface Heir {
   id: string;
@@ -54,7 +56,6 @@ const Calculator = () => {
       return;
     }
 
-    // Import and use the calculation engine
     import("@/lib/shariaCalculator").then(({ calculateInheritance }) => {
       const result = calculateInheritance(parseFloat(estateValue), heirs);
       setCalculationResult(result);
@@ -72,7 +73,6 @@ const Calculator = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
       <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -82,14 +82,14 @@ const Calculator = () => {
               </div>
               <span className="text-xl font-bold text-foreground">Mawareth</span>
             </div>
-            <Button variant="ghost" onClick={() => navigate('/')}>
-              Back to Home
-            </Button>
+            <div className="flex gap-3">
+              <LanguageToggle />
+              <Button variant="ghost" onClick={() => navigate('/')}>Back to Home</Button>
+            </div>
           </div>
         </div>
       </nav>
 
-      {/* Calculator Section */}
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           {showResults && calculationResult ? (
@@ -99,143 +99,104 @@ const Calculator = () => {
             />
           ) : (
             <>
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-3">
-              Estate Calculator
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Calculate inheritance shares according to Sharia law
-            </p>
-          </div>
-
-          <Card className="p-8 shadow-medium mb-6">
-            <div className="space-y-6">
-              {/* Estate Value */}
-              <div>
-                <Label htmlFor="estate-value" className="text-base font-semibold">
-                  Total Estate Value (EGP)
-                </Label>
-                <Input
-                  id="estate-value"
-                  type="number"
-                  placeholder="e.g., 2,000,000"
-                  value={estateValue}
-                  onChange={(e) => setEstateValue(e.target.value)}
-                  className="mt-2 text-lg"
-                />
+              <div className="text-center mb-8">
+                <h1 className="text-4xl font-bold text-foreground mb-3">Estate Calculator</h1>
+                <p className="text-lg text-muted-foreground">Calculate inheritance shares according to Sharia law</p>
               </div>
 
-              {/* Heirs Section */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <Label className="text-base font-semibold">
-                    Heirs & Beneficiaries
-                  </Label>
-                  <Button onClick={addHeir} size="sm" variant="outline">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Heir
+              <Card className="p-8 shadow-medium mb-6">
+                <div className="space-y-6">
+                  <div>
+                    <Label htmlFor="estate-value" className="text-base font-semibold">Total Estate Value (EGP)</Label>
+                    <Input
+                      id="estate-value"
+                      type="number"
+                      placeholder="e.g., 2,000,000"
+                      value={estateValue}
+                      onChange={(e) => setEstateValue(e.target.value)}
+                      className="mt-2 text-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <Label className="text-base font-semibold">Heirs & Beneficiaries</Label>
+                      <Button onClick={addHeir} size="sm" variant="outline">
+                        <Plus className="w-4 h-4 mr-2" />Add Heir
+                      </Button>
+                    </div>
+
+                    <div className="space-y-4">
+                      {heirs.map((heir) => (
+                        <Card key={heir.id} className="p-4 border-border">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-1 grid md:grid-cols-3 gap-4">
+                              <div>
+                                <Label htmlFor={`name-${heir.id}`} className="text-sm">Name</Label>
+                                <Input
+                                  id={`name-${heir.id}`}
+                                  placeholder="Heir name"
+                                  value={heir.name}
+                                  onChange={(e) => updateHeir(heir.id, 'name', e.target.value)}
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor={`relationship-${heir.id}`} className="text-sm">Relationship</Label>
+                                <Select value={heir.relationship} onValueChange={(value) => updateHeir(heir.id, 'relationship', value)}>
+                                  <SelectTrigger id={`relationship-${heir.id}`} className="mt-1">
+                                    <SelectValue placeholder="Select" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="spouse">Spouse</SelectItem>
+                                    <SelectItem value="son">Son</SelectItem>
+                                    <SelectItem value="daughter">Daughter</SelectItem>
+                                    <SelectItem value="father">Father</SelectItem>
+                                    <SelectItem value="mother">Mother</SelectItem>
+                                    <SelectItem value="brother">Brother</SelectItem>
+                                    <SelectItem value="sister">Sister</SelectItem>
+                                    <SelectItem value="grandfather">Grandfather</SelectItem>
+                                    <SelectItem value="grandmother">Grandmother</SelectItem>
+                                    <SelectItem value="stepmother">Stepmother (No Inheritance)</SelectItem>
+                                    <SelectItem value="stepbrother_paternal">Stepbrother (Paternal)</SelectItem>
+                                    <SelectItem value="stepsister_paternal">Stepsister (Paternal)</SelectItem>
+                                    <SelectItem value="stepbrother_maternal">Stepbrother (Maternal)</SelectItem>
+                                    <SelectItem value="stepsister_maternal">Stepsister (Maternal)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label htmlFor={`gender-${heir.id}`} className="text-sm">Gender</Label>
+                                <Select value={heir.gender} onValueChange={(value) => updateHeir(heir.id, 'gender', value)}>
+                                  <SelectTrigger id={`gender-${heir.id}`} className="mt-1">
+                                    <SelectValue placeholder="Select" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="male">Male</SelectItem>
+                                    <SelectItem value="female">Female</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                            {heirs.length > 1 && (
+                              <Button variant="ghost" size="icon" onClick={() => removeHeir(heir.id)} className="mt-6 text-destructive hover:text-destructive">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button size="lg" className="w-full shadow-medium" onClick={handleCalculate}>
+                    Calculate Inheritance Shares
                   </Button>
                 </div>
+              </Card>
 
-                <div className="space-y-4">
-                  {heirs.map((heir, index) => (
-                    <Card key={heir.id} className="p-4 border-border">
-                      <div className="flex items-start gap-4">
-                        <div className="flex-1 grid md:grid-cols-3 gap-4">
-                          <div>
-                            <Label htmlFor={`name-${heir.id}`} className="text-sm">
-                              Name
-                            </Label>
-                            <Input
-                              id={`name-${heir.id}`}
-                              placeholder="Heir name"
-                              value={heir.name}
-                              onChange={(e) => updateHeir(heir.id, 'name', e.target.value)}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor={`relationship-${heir.id}`} className="text-sm">
-                              Relationship
-                            </Label>
-                            <Select
-                              value={heir.relationship}
-                              onValueChange={(value) => updateHeir(heir.id, 'relationship', value)}
-                            >
-                              <SelectTrigger id={`relationship-${heir.id}`} className="mt-1">
-                                <SelectValue placeholder="Select" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="spouse">Spouse</SelectItem>
-                                <SelectItem value="son">Son</SelectItem>
-                                <SelectItem value="daughter">Daughter</SelectItem>
-                                <SelectItem value="father">Father</SelectItem>
-                                <SelectItem value="mother">Mother</SelectItem>
-                                <SelectItem value="brother">Brother</SelectItem>
-                                <SelectItem value="sister">Sister</SelectItem>
-                                <SelectItem value="grandfather">Grandfather</SelectItem>
-                                <SelectItem value="grandmother">Grandmother</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor={`gender-${heir.id}`} className="text-sm">
-                              Gender
-                            </Label>
-                            <Select
-                              value={heir.gender}
-                              onValueChange={(value) => updateHeir(heir.id, 'gender', value)}
-                            >
-                              <SelectTrigger id={`gender-${heir.id}`} className="mt-1">
-                                <SelectValue placeholder="Select" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="male">Male</SelectItem>
-                                <SelectItem value="female">Female</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        {heirs.length > 1 && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeHeir(heir.id)}
-                            className="mt-6 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-
-              {/* Calculate Button */}
-              <Button 
-                size="lg" 
-                className="w-full shadow-medium" 
-                onClick={handleCalculate}
-              >
-                Calculate Inheritance Shares
-              </Button>
-            </div>
-          </Card>
-
-          {/* Info Card */}
-          <Card className="p-6 bg-primary/5 border-primary/20">
-            <h3 className="font-semibold text-foreground mb-2">
-              How Our Calculation Works
-            </h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• Calculations follow Sharia inheritance law principles</li>
-              <li>• Accounts for fixed shares (Fard) and residual shares (Asabah)</li>
-              <li>• Considers gender, relationship, and other heirs present</li>
-              <li>• Generates court-ready documentation for Egyptian legal system</li>
-            </ul>
-          </Card>
-          </>
+              <ShariaExplainer />
+            </>
           )}
         </div>
       </div>
