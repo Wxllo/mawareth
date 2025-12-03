@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Calculator, Handshake, Gavel } from "lucide-react";
+import { Calculator, Handshake, Gavel, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -7,54 +7,96 @@ export const ServiceGrid = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
 
+  const content = {
+    en: {
+      eyebrow: "Our Services",
+      headline: "Three Paths to Resolution",
+    },
+    ar: {
+      eyebrow: "خدماتنا",
+      headline: "ثلاث طرق للحل",
+    },
+  };
+
+  const t = content[language];
+
   const services = [
     {
       icon: Calculator,
       titleEn: "Calculate Shares",
       titleAr: "حساب الأنصبة",
-      subtextEn: "Know your Sharia rights",
-      subtextAr: "اعرف حقوقك الشرعية",
+      subtextEn: "Get your exact Sharia-compliant inheritance share in minutes. Free, accurate, and educational.",
+      subtextAr: "احصل على حصتك الشرعية الدقيقة في دقائق. مجاني ودقيق وتعليمي.",
       path: "/calculator",
+      color: "primary",
     },
     {
       icon: Handshake,
       titleEn: "Family Buyout",
       titleAr: "شراء حصص الورثة",
-      subtextEn: "Keep the property",
-      subtextAr: "احتفظ بالعقار",
+      subtextEn: "Finance the purchase of other heirs' shares through Sharia-compliant Murabaha.",
+      subtextAr: "موّل شراء حصص الورثة الآخرين من خلال المرابحة الإسلامية.",
       path: "/loan-application",
+      color: "accent",
     },
     {
       icon: Gavel,
       titleEn: "Asset Liquidation",
       titleAr: "تسييل الأصول",
-      subtextEn: "Sell disputed assets",
-      subtextAr: "بيع الأصول المتنازع عليها",
+      subtextEn: "Sell disputed property to verified investors at competitive prices.",
+      subtextAr: "بيع العقارات المتنازع عليها لمستثمرين موثقين بأسعار تنافسية.",
       path: "/marketplace",
+      color: "success-green",
     },
   ];
 
+  const colorClasses = {
+    primary: "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground",
+    accent: "bg-accent/10 text-accent-foreground group-hover:bg-accent group-hover:text-accent-foreground",
+    "success-green": "bg-success-green/10 text-success-green group-hover:bg-success-green group-hover:text-white",
+  };
+
   return (
-    <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-      {services.map((service, idx) => (
-        <Card
-          key={idx}
-          onClick={() => navigate(service.path)}
-          className="group cursor-pointer p-8 bg-card border-2 border-border hover:border-accent transition-all duration-200 shadow-medium hover:shadow-strong"
-        >
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors">
-              <service.icon className="w-8 h-8 text-primary" strokeWidth={1.5} />
-            </div>
-            <h3 className="text-xl font-bold text-foreground mb-2">
-              {language === 'ar' ? service.titleAr : service.titleEn}
-            </h3>
-            <p className="text-muted-foreground text-sm">
-              {language === 'ar' ? service.subtextAr : service.subtextEn}
-            </p>
-          </div>
-        </Card>
-      ))}
-    </div>
+    <section className="py-16 md:py-24 bg-muted/30">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-3">
+            {t.eyebrow}
+          </p>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+            {t.headline}
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {services.map((service, idx) => (
+            <Card
+              key={idx}
+              onClick={() => navigate(service.path)}
+              className="group cursor-pointer p-8 bg-card border-2 border-border hover:border-primary/50 transition-all duration-300 shadow-soft hover:shadow-medium"
+            >
+              <div className="flex flex-col h-full">
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-colors ${colorClasses[service.color as keyof typeof colorClasses]}`}>
+                  <service.icon className="w-7 h-7" strokeWidth={1.5} />
+                </div>
+                
+                <h3 className="text-xl font-bold text-foreground mb-3">
+                  {language === 'ar' ? service.titleAr : service.titleEn}
+                </h3>
+                
+                <p className="text-muted-foreground text-sm flex-1 mb-6">
+                  {language === 'ar' ? service.subtextAr : service.subtextEn}
+                </p>
+
+                <div className="flex items-center text-primary font-medium text-sm group-hover:gap-2 transition-all">
+                  <span>{language === 'ar' ? 'ابدأ الآن' : 'Get Started'}</span>
+                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 };

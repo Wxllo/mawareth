@@ -2,16 +2,16 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Home, MapPin, Users, TrendingUp } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Home, MapPin, TrendingUp, Vote, Wrench, Building } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { LanguageToggle } from "@/components/LanguageToggle";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { VotingBar } from "@/components/dashboard/VotingBar";
 import { MerathFix } from "@/components/dashboard/MerathFix";
 import { SilentConsensus } from "@/components/dashboard/SilentConsensus";
 import { LeasingSimulator } from "@/components/dashboard/LeasingSimulator";
 import { FinancingToggle } from "@/components/dashboard/FinancingToggle";
-import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { api, formatEGP } from "@/services/api";
 import { Estate, RenovationOffer } from "@/types/models";
 
@@ -56,7 +56,12 @@ const Dashboard = () => {
         listed: "Listed",
         sold: "Sold",
       },
-      buyoutOptions: "Buyout Options",
+      tabs: {
+        overview: "Overview",
+        voting: "Voting",
+        financing: "Financing",
+        renovation: "Renovation",
+      },
       viewMarketplace: "View Marketplace",
     },
     ar: {
@@ -72,7 +77,12 @@ const Dashboard = () => {
         listed: "معروض",
         sold: "تم البيع",
       },
-      buyoutOptions: "خيارات الشراء",
+      tabs: {
+        overview: "نظرة عامة",
+        voting: "التصويت",
+        financing: "التمويل",
+        renovation: "الترميم",
+      },
       viewMarketplace: "عرض السوق",
     },
   };
@@ -87,70 +97,54 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b border-border bg-card sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-primary-foreground" strokeWidth={1.5} />
-              </div>
-              <span className="text-xl font-bold text-foreground">Mawareth</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <LanguageToggle />
-              <Button variant="ghost" onClick={() => navigate('/calculator')}>
-                {language === 'ar' ? 'الحاسبة' : 'Calculator'}
-              </Button>
-              <Button variant="ghost" onClick={() => navigate('/marketplace')}>
-                {language === 'ar' ? 'السوق' : 'Marketplace'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Header */}
-      <section className="py-6 border-b border-border">
+    <PageContainer>
+      {/* Page Header */}
+      <section className="py-8 border-b border-border bg-card">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-bold text-foreground">{t.title}</h1>
-          <p className="text-muted-foreground">{t.subtitle}</p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t.title}</h1>
+              <p className="text-muted-foreground mt-1">{t.subtitle}</p>
+            </div>
+            <Button onClick={() => navigate('/marketplace')} variant="outline" className="w-fit">
+              {t.viewMarketplace}
+            </Button>
+          </div>
         </div>
       </section>
 
       {/* Main Content */}
       <section className="py-8">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Estate Selector */}
+          <div className="grid lg:grid-cols-4 gap-8">
+            {/* Estate Selector - Sidebar */}
             <div className="lg:col-span-1">
-              <Card className="shadow-medium">
+              <Card className="shadow-soft sticky top-24">
                 <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Home className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Building className="w-5 h-5 text-primary" strokeWidth={1.5} />
                     {t.yourEstates}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-2">
                   {estates.map((estate) => (
                     <div
                       key={estate._id}
                       onClick={() => setSelectedEstate(estate)}
                       className={`p-4 rounded-lg cursor-pointer transition-all border-2 ${
                         selectedEstate?._id === estate._id 
-                          ? 'bg-primary/5 border-primary' 
+                          ? 'bg-primary/5 border-primary shadow-soft' 
                           : 'bg-card hover:bg-muted border-transparent'
                       }`}
                     >
                       <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-1">
                         {estate.title}
                       </h3>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                         <MapPin className="w-3 h-3" />
                         {estate.city}
                       </div>
-                      <Badge className={`mt-2 text-xs border ${statusColors[estate.status]}`}>
+                      <Badge className={`text-xs border ${statusColors[estate.status]}`}>
                         {t.statusLabels[estate.status]}
                       </Badge>
                     </div>
@@ -159,20 +153,20 @@ const Dashboard = () => {
               </Card>
             </div>
 
-            {/* Estate Details */}
-            <div className="lg:col-span-2 space-y-6">
+            {/* Estate Details - Main Content */}
+            <div className="lg:col-span-3">
               {selectedEstate ? (
-                <>
-                  {/* Estate Overview */}
-                  <Card className="shadow-medium">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
+                <div className="space-y-6">
+                  {/* Estate Header Card */}
+                  <Card className="shadow-soft overflow-hidden">
+                    <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-6">
+                      <div className="flex items-start justify-between mb-4">
                         <div>
                           <p className="text-sm text-muted-foreground mb-1">{t.activeEstate}</p>
-                          <h2 className="text-xl font-bold text-foreground">
+                          <h2 className="text-xl md:text-2xl font-bold text-foreground">
                             {selectedEstate.title}
                           </h2>
-                          <p className="text-muted-foreground flex items-center gap-1 mt-1 text-sm">
+                          <p className="text-muted-foreground flex items-center gap-1 mt-2 text-sm">
                             <MapPin className="w-4 h-4" />
                             {selectedEstate.address}
                           </p>
@@ -181,76 +175,101 @@ const Dashboard = () => {
                           {t.statusLabels[selectedEstate.status]}
                         </Badge>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid sm:grid-cols-3 gap-4 mb-6">
-                        <div className="p-4 bg-muted rounded-lg text-center">
-                          <p className="text-sm text-muted-foreground">{t.estateValue}</p>
-                          <p className="text-xl font-bold text-foreground">
+
+                      {/* Stats Row */}
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="p-4 bg-card rounded-lg text-center shadow-soft">
+                          <p className="text-xs text-muted-foreground mb-1">{t.estateValue}</p>
+                          <p className="text-lg font-bold text-foreground">
                             {formatEGP(selectedEstate.marketValuation)}
                           </p>
                         </div>
-                        <div className="p-4 bg-primary/5 rounded-lg text-center border border-primary/20">
-                          <p className="text-sm text-primary">{t.yourShare}</p>
-                          <p className="text-xl font-bold text-primary">
+                        <div className="p-4 bg-primary/10 rounded-lg text-center border border-primary/20">
+                          <p className="text-xs text-primary mb-1">{t.yourShare}</p>
+                          <p className="text-lg font-bold text-primary">
                             {selectedEstate.heirs[0]?.sharePercentage}%
                           </p>
                         </div>
-                        <div className="p-4 bg-accent/5 rounded-lg text-center border border-accent/20">
-                          <p className="text-sm text-accent-foreground">{t.yourShare}</p>
-                          <p className="text-xl font-bold text-accent-foreground">
+                        <div className="p-4 bg-accent/10 rounded-lg text-center border border-accent/20">
+                          <p className="text-xs text-accent-foreground mb-1">{t.yourShare}</p>
+                          <p className="text-lg font-bold text-accent-foreground">
                             {formatEGP(selectedEstate.heirs[0]?.shareValue || 0)}
                           </p>
                         </div>
                       </div>
-
-                      {/* Voting Bar */}
-                      <VotingBar estate={selectedEstate} />
-                    </CardContent>
+                    </div>
                   </Card>
 
-                  {/* Silent Consensus Widget */}
-                  {selectedEstate.consensus && (
-                    <SilentConsensus
-                      acceptedCount={selectedEstate.consensus.accepted}
-                      totalHeirs={selectedEstate.consensus.total}
-                      hasVoted={hasVoted}
-                      onVote={handleConsensusVote}
-                    />
-                  )}
+                  {/* Tabbed Content */}
+                  <Tabs defaultValue="overview" className="w-full">
+                    <TabsList className="w-full grid grid-cols-4 h-12 mb-6">
+                      <TabsTrigger value="overview" className="gap-2">
+                        <Home className="w-4 h-4" />
+                        <span className="hidden sm:inline">{t.tabs.overview}</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="voting" className="gap-2">
+                        <Vote className="w-4 h-4" />
+                        <span className="hidden sm:inline">{t.tabs.voting}</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="financing" className="gap-2">
+                        <TrendingUp className="w-4 h-4" />
+                        <span className="hidden sm:inline">{t.tabs.financing}</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="renovation" className="gap-2">
+                        <Wrench className="w-4 h-4" />
+                        <span className="hidden sm:inline">{t.tabs.renovation}</span>
+                      </TabsTrigger>
+                    </TabsList>
 
-                  {/* Leasing Simulator */}
-                  <LeasingSimulator
-                    loanAmount={selectedEstate.heirs[0]?.shareValue || 0}
-                    monthlyInstallment={Math.round((selectedEstate.heirs[0]?.shareValue || 0) * 1.15 / 60)}
-                    estimatedRent={Math.round(selectedEstate.marketValuation * 0.005)}
-                  />
+                    <TabsContent value="overview" className="space-y-6">
+                      <VotingBar estate={selectedEstate} />
+                      {selectedEstate.consensus && (
+                        <SilentConsensus
+                          acceptedCount={selectedEstate.consensus.accepted}
+                          totalHeirs={selectedEstate.consensus.total}
+                          hasVoted={hasVoted}
+                          onVote={handleConsensusVote}
+                        />
+                      )}
+                    </TabsContent>
 
-                  {/* Financing Toggle */}
-                  <div>
-                    <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                      {t.buyoutOptions}
-                    </h3>
-                    <FinancingToggle assetPrice={selectedEstate.heirs[0]?.shareValue || 1000000} />
-                  </div>
+                    <TabsContent value="voting" className="space-y-6">
+                      <VotingBar estate={selectedEstate} />
+                      {selectedEstate.consensus && (
+                        <SilentConsensus
+                          acceptedCount={selectedEstate.consensus.accepted}
+                          totalHeirs={selectedEstate.consensus.total}
+                          hasVoted={hasVoted}
+                          onVote={handleConsensusVote}
+                        />
+                      )}
+                    </TabsContent>
 
-                  {/* Mawareth Fix */}
-                  {renovationOffer && <MerathFix offer={renovationOffer} />}
+                    <TabsContent value="financing" className="space-y-6">
+                      <LeasingSimulator
+                        loanAmount={selectedEstate.heirs[0]?.shareValue || 0}
+                        monthlyInstallment={Math.round((selectedEstate.heirs[0]?.shareValue || 0) * 1.15 / 60)}
+                        estimatedRent={Math.round(selectedEstate.marketValuation * 0.005)}
+                      />
+                      <FinancingToggle assetPrice={selectedEstate.heirs[0]?.shareValue || 1000000} />
+                    </TabsContent>
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-4">
-                    <Button 
-                      onClick={() => navigate('/marketplace')}
-                      variant="outline"
-                      className="flex-1 h-12"
-                    >
-                      {t.viewMarketplace}
-                    </Button>
-                  </div>
-                </>
+                    <TabsContent value="renovation" className="space-y-6">
+                      {renovationOffer ? (
+                        <MerathFix offer={renovationOffer} />
+                      ) : (
+                        <Card className="p-12 text-center">
+                          <Wrench className="w-12 h-12 text-muted-foreground mx-auto mb-4" strokeWidth={1} />
+                          <p className="text-muted-foreground">
+                            {language === 'ar' ? 'لا توجد عروض ترميم متاحة' : 'No renovation offers available'}
+                          </p>
+                        </Card>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                </div>
               ) : (
-                <Card className="p-12 text-center shadow-medium">
+                <Card className="p-12 text-center shadow-soft">
                   <Home className="w-16 h-16 text-muted-foreground mx-auto mb-4" strokeWidth={1} />
                   <p className="text-xl text-muted-foreground">
                     {language === 'ar' ? 'اختر عقاراً لعرض التفاصيل' : 'Select an estate to view details'}
@@ -261,26 +280,7 @@ const Dashboard = () => {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border py-8 bg-card mt-8">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-primary-foreground" strokeWidth={1.5} />
-              </div>
-              <span className="font-semibold text-foreground">Mawareth</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              © 2025 Mawareth. {language === 'ar' ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
-            </p>
-          </div>
-        </div>
-      </footer>
-
-      <WhatsAppButton />
-    </div>
+    </PageContainer>
   );
 };
 
