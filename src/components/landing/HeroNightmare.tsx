@@ -3,11 +3,11 @@ import { Calculator, ArrowRight, AlertTriangle, Clock, Users } from "lucide-reac
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { MashrabiyaPattern } from "@/components/ui/MashrabiyaPattern";
-
 export const HeroNightmare = () => {
   const navigate = useNavigate();
-  const { language } = useLanguage();
-
+  const {
+    language
+  } = useLanguage();
   const content = {
     en: {
       nightmareTitle: "In Egypt, inheritance isn't a gift;",
@@ -24,7 +24,7 @@ export const HeroNightmare = () => {
       stat2: "₤50B+",
       stat2Label: "Frozen in inherited assets",
       stat3: "70%",
-      stat3Label: "Families face disputes",
+      stat3Label: "Families face disputes"
     },
     ar: {
       nightmareTitle: "في مصر، الميراث ليس هدية؛",
@@ -41,14 +41,11 @@ export const HeroNightmare = () => {
       stat2: "+50 مليار جنيه",
       stat2Label: "مجمدة في الأصول الموروثة",
       stat3: "70%",
-      stat3Label: "من العائلات تواجه نزاعات",
-    },
+      stat3Label: "من العائلات تواجه نزاعات"
+    }
   };
-
   const t = content[language];
-
-  return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-emerald">
+  return <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-emerald">
       {/* Dark emerald background with pattern */}
       <div className="absolute inset-0 bg-emerald" />
       <MashrabiyaPattern opacity={0.08} />
@@ -92,20 +89,11 @@ export const HeroNightmare = () => {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 mb-16">
-            <Button 
-              size="lg" 
-              onClick={() => navigate('/calculator')} 
-              className="bg-gold hover:bg-gold/90 text-emerald-dark shadow-strong text-lg px-8 py-6"
-            >
+            <Button size="lg" onClick={() => navigate('/calculator')} className="bg-gold hover:bg-gold/90 text-emerald-dark shadow-strong text-lg px-8 py-6">
               <Calculator className="w-5 h-5 mr-2" />
               {t.cta1}
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              onClick={() => navigate('/about')}
-              className="border-emerald-foreground/30 text-emerald-foreground hover:bg-emerald-foreground/10 text-lg px-8 py-6"
-            >
+            <Button size="lg" variant="outline" onClick={() => navigate('/about')} className="border-emerald-foreground/30 text-lg px-8 py-6 text-popover bg-card">
               {t.cta2}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
@@ -131,6 +119,5 @@ export const HeroNightmare = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
