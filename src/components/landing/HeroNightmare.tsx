@@ -93,7 +93,7 @@ export const HeroNightmare = () => {
               <Calculator className="w-5 h-5 mr-2" />
               {t.cta1}
             </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate('/about')} className="border-emerald-foreground/30 text-lg px-8 py-6 text-popover bg-card">
+            <Button size="lg" variant="outline" onClick={() => navigate('/about')} className="border-emerald-foreground/30 text-lg px-8 py-6 text-popover bg-muted-foreground">
               {t.cta2}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
