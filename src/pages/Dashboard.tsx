@@ -2,23 +2,26 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Home, MapPin, Users, TrendingUp, Vote, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Building2, Home, MapPin, Users, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { VotingBar } from "@/components/dashboard/VotingBar";
 import { MerathFix } from "@/components/dashboard/MerathFix";
+import { SilentConsensus } from "@/components/dashboard/SilentConsensus";
+import { LeasingSimulator } from "@/components/dashboard/LeasingSimulator";
+import { FinancingToggle } from "@/components/dashboard/FinancingToggle";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { api, formatEGP } from "@/services/api";
 import { Estate, RenovationOffer } from "@/types/models";
-import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { toast } = useToast();
   const [estates, setEstates] = useState<Estate[]>([]);
   const [selectedEstate, setSelectedEstate] = useState<Estate | null>(null);
   const [renovationOffer, setRenovationOffer] = useState<RenovationOffer | null>(null);
+  const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,21 +36,10 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const handleVote = async (vote: 'sell' | 'keep') => {
+  const handleConsensusVote = async (vote: 'accept' | 'reject') => {
     if (!selectedEstate) return;
-    
-    // Simulate voting for the first heir (in real app, this would be the logged-in user)
-    const result = await api.estates.updateVote(selectedEstate._id, selectedEstate.heirs[0]._id, vote);
-    
-    if (result) {
-      toast({
-        title: language === 'ar' ? 'تم التصويت!' : 'Vote Recorded!',
-        description: language === 'ar' ? `صوتك: ${vote === 'sell' ? 'بيع' : 'احتفاظ'}` : `Your vote: ${vote}`,
-      });
-      // Refresh estate data
-      const updatedEstate = await api.estates.getById(selectedEstate._id);
-      if (updatedEstate) setSelectedEstate(updatedEstate);
-    }
+    await api.estates.updateConsensus(selectedEstate._id, vote);
+    setHasVoted(true);
   };
 
   const content = {
@@ -58,19 +50,14 @@ const Dashboard = () => {
       activeEstate: "Active Estate",
       yourShare: "Your Share",
       estateValue: "Estate Value",
-      status: "Status",
       statusLabels: {
         disputed: "Disputed",
         voting: "Voting",
         listed: "Listed",
         sold: "Sold",
       },
-      heirBreakdown: "Heir Breakdown",
-      castYourVote: "Cast Your Vote",
-      voteToSell: "Vote to Sell",
-      voteToKeep: "Vote to Keep",
-      viewMarketplace: "View on Marketplace",
-      applyForLoan: "Apply for Buyout Loan",
+      buyoutOptions: "Buyout Options",
+      viewMarketplace: "View Marketplace",
     },
     ar: {
       title: "لوحة تحكم الوارث",
@@ -79,44 +66,39 @@ const Dashboard = () => {
       activeEstate: "العقار النشط",
       yourShare: "حصتك",
       estateValue: "قيمة العقار",
-      status: "الحالة",
       statusLabels: {
         disputed: "متنازع عليه",
         voting: "تصويت",
         listed: "معروض",
         sold: "تم البيع",
       },
-      heirBreakdown: "توزيع الورثة",
-      castYourVote: "أدلِ بصوتك",
-      voteToSell: "صوت للبيع",
-      voteToKeep: "صوت للاحتفاظ",
-      viewMarketplace: "عرض في السوق",
-      applyForLoan: "تقدم لقرض الشراء",
+      buyoutOptions: "خيارات الشراء",
+      viewMarketplace: "عرض السوق",
     },
   };
 
   const t = content[language];
 
   const statusColors = {
-    disputed: "bg-destructive/20 text-destructive",
-    voting: "bg-gold/20 text-gold",
-    listed: "bg-success-green/20 text-success-green",
-    sold: "bg-muted text-muted-foreground",
+    disputed: "bg-destructive/10 text-destructive border-destructive/20",
+    voting: "bg-accent/10 text-accent-foreground border-accent/20",
+    listed: "bg-success-green/10 text-success-green border-success-green/20",
+    sold: "bg-muted text-muted-foreground border-border",
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="w-10 h-10 bg-emerald rounded-lg flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-emerald-foreground" />
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-primary-foreground" strokeWidth={1.5} />
               </div>
               <span className="text-xl font-bold text-foreground">Mawareth</span>
             </div>
-            <div className="flex gap-3">
+            <div className="flex items-center gap-4">
               <LanguageToggle />
               <Button variant="ghost" onClick={() => navigate('/calculator')}>
                 {language === 'ar' ? 'الحاسبة' : 'Calculator'}
@@ -130,9 +112,9 @@ const Dashboard = () => {
       </nav>
 
       {/* Header */}
-      <section className="py-8 bg-muted/30 border-b border-border">
+      <section className="py-6 border-b border-border">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold text-foreground mb-2">{t.title}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t.title}</h1>
           <p className="text-muted-foreground">{t.subtitle}</p>
         </div>
       </section>
@@ -143,10 +125,10 @@ const Dashboard = () => {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Estate Selector */}
             <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Home className="w-5 h-5 text-emerald" />
+              <Card className="shadow-medium">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Home className="w-5 h-5 text-primary" strokeWidth={1.5} />
                     {t.yourEstates}
                   </CardTitle>
                 </CardHeader>
@@ -155,10 +137,10 @@ const Dashboard = () => {
                     <div
                       key={estate._id}
                       onClick={() => setSelectedEstate(estate)}
-                      className={`p-4 rounded-lg cursor-pointer transition-all ${
+                      className={`p-4 rounded-lg cursor-pointer transition-all border-2 ${
                         selectedEstate?._id === estate._id 
-                          ? 'bg-emerald/10 border-2 border-emerald' 
-                          : 'bg-muted hover:bg-muted/80 border-2 border-transparent'
+                          ? 'bg-primary/5 border-primary' 
+                          : 'bg-card hover:bg-muted border-transparent'
                       }`}
                     >
                       <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-1">
@@ -168,7 +150,7 @@ const Dashboard = () => {
                         <MapPin className="w-3 h-3" />
                         {estate.city}
                       </div>
-                      <Badge className={`mt-2 text-xs ${statusColors[estate.status]}`}>
+                      <Badge className={`mt-2 text-xs border ${statusColors[estate.status]}`}>
                         {t.statusLabels[estate.status]}
                       </Badge>
                     </div>
@@ -182,20 +164,20 @@ const Dashboard = () => {
               {selectedEstate ? (
                 <>
                   {/* Estate Overview */}
-                  <Card>
+                  <Card className="shadow-medium">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div>
-                          <CardTitle>{t.activeEstate}</CardTitle>
-                          <h2 className="text-xl font-bold text-foreground mt-2">
+                          <p className="text-sm text-muted-foreground mb-1">{t.activeEstate}</p>
+                          <h2 className="text-xl font-bold text-foreground">
                             {selectedEstate.title}
                           </h2>
-                          <p className="text-muted-foreground flex items-center gap-1 mt-1">
+                          <p className="text-muted-foreground flex items-center gap-1 mt-1 text-sm">
                             <MapPin className="w-4 h-4" />
                             {selectedEstate.address}
                           </p>
                         </div>
-                        <Badge className={statusColors[selectedEstate.status]}>
+                        <Badge className={`border ${statusColors[selectedEstate.status]}`}>
                           {t.statusLabels[selectedEstate.status]}
                         </Badge>
                       </div>
@@ -208,15 +190,15 @@ const Dashboard = () => {
                             {formatEGP(selectedEstate.marketValuation)}
                           </p>
                         </div>
-                        <div className="p-4 bg-emerald/10 rounded-lg text-center">
-                          <p className="text-sm text-emerald">{t.yourShare}</p>
-                          <p className="text-xl font-bold text-emerald">
+                        <div className="p-4 bg-primary/5 rounded-lg text-center border border-primary/20">
+                          <p className="text-sm text-primary">{t.yourShare}</p>
+                          <p className="text-xl font-bold text-primary">
                             {selectedEstate.heirs[0]?.sharePercentage}%
                           </p>
                         </div>
-                        <div className="p-4 bg-gold/10 rounded-lg text-center">
-                          <p className="text-sm text-gold">{t.yourShare}</p>
-                          <p className="text-xl font-bold text-gold">
+                        <div className="p-4 bg-accent/5 rounded-lg text-center border border-accent/20">
+                          <p className="text-sm text-accent-foreground">{t.yourShare}</p>
+                          <p className="text-xl font-bold text-accent-foreground">
                             {formatEGP(selectedEstate.heirs[0]?.shareValue || 0)}
                           </p>
                         </div>
@@ -227,94 +209,49 @@ const Dashboard = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Heir Breakdown */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Users className="w-5 h-5 text-emerald" />
-                        {t.heirBreakdown}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {selectedEstate.heirs.map((heir) => (
-                          <div key={heir._id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-emerald/20 rounded-full flex items-center justify-center">
-                                <Users className="w-5 h-5 text-emerald" />
-                              </div>
-                              <div>
-                                <p className="font-semibold text-foreground">{heir.userName}</p>
-                                <p className="text-sm text-muted-foreground">{heir.relation}</p>
-                              </div>
-                            </div>
-                            <div className="text-right flex items-center gap-4">
-                              <div>
-                                <p className="font-bold text-foreground">{heir.sharePercentage}%</p>
-                                <p className="text-sm text-muted-foreground">{formatEGP(heir.shareValue)}</p>
-                              </div>
-                              {heir.vote === 'sell' && <CheckCircle className="w-5 h-5 text-success-green" />}
-                              {heir.vote === 'keep' && <XCircle className="w-5 h-5 text-destructive" />}
-                              {heir.vote === 'pending' && <Clock className="w-5 h-5 text-muted-foreground" />}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {/* Silent Consensus Widget */}
+                  {selectedEstate.consensus && (
+                    <SilentConsensus
+                      acceptedCount={selectedEstate.consensus.accepted}
+                      totalHeirs={selectedEstate.consensus.total}
+                      hasVoted={hasVoted}
+                      onVote={handleConsensusVote}
+                    />
+                  )}
 
-                  {/* Vote Actions */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Vote className="w-5 h-5 text-emerald" />
-                        {t.castYourVote}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                        <Button 
-                          onClick={() => handleVote('sell')}
-                          className="bg-success-green hover:bg-success-green/90 text-white"
-                          size="lg"
-                        >
-                          <CheckCircle className="w-5 h-5 mr-2" />
-                          {t.voteToSell}
-                        </Button>
-                        <Button 
-                          onClick={() => handleVote('keep')}
-                          variant="outline"
-                          className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                          size="lg"
-                        >
-                          <XCircle className="w-5 h-5 mr-2" />
-                          {t.voteToKeep}
-                        </Button>
-                      </div>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <Button 
-                          onClick={() => navigate('/marketplace')}
-                          variant="outline"
-                        >
-                          <TrendingUp className="w-4 h-4 mr-2" />
-                          {t.viewMarketplace}
-                        </Button>
-                        <Button 
-                          onClick={() => navigate('/loan-application')}
-                          className="bg-gold hover:bg-gold/90 text-emerald-dark"
-                        >
-                          {t.applyForLoan}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {/* Leasing Simulator */}
+                  <LeasingSimulator
+                    loanAmount={selectedEstate.heirs[0]?.shareValue || 0}
+                    monthlyInstallment={Math.round((selectedEstate.heirs[0]?.shareValue || 0) * 1.15 / 60)}
+                    estimatedRent={Math.round(selectedEstate.marketValuation * 0.005)}
+                  />
+
+                  {/* Financing Toggle */}
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                      {t.buyoutOptions}
+                    </h3>
+                    <FinancingToggle assetPrice={selectedEstate.heirs[0]?.shareValue || 1000000} />
+                  </div>
 
                   {/* Mawareth Fix */}
                   {renovationOffer && <MerathFix offer={renovationOffer} />}
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-4">
+                    <Button 
+                      onClick={() => navigate('/marketplace')}
+                      variant="outline"
+                      className="flex-1 h-12"
+                    >
+                      {t.viewMarketplace}
+                    </Button>
+                  </div>
                 </>
               ) : (
-                <Card className="p-12 text-center">
-                  <Home className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <Card className="p-12 text-center shadow-medium">
+                  <Home className="w-16 h-16 text-muted-foreground mx-auto mb-4" strokeWidth={1} />
                   <p className="text-xl text-muted-foreground">
                     {language === 'ar' ? 'اختر عقاراً لعرض التفاصيل' : 'Select an estate to view details'}
                   </p>
@@ -330,17 +267,19 @@ const Dashboard = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-emerald rounded-lg flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-emerald-foreground" />
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-primary-foreground" strokeWidth={1.5} />
               </div>
               <span className="font-semibold text-foreground">Mawareth</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2025 Mawareth. {language === 'ar' ? 'تبسيط الميراث في مصر' : 'Simplifying inheritance in Egypt.'}
+              © 2025 Mawareth. {language === 'ar' ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
             </p>
           </div>
         </div>
       </footer>
+
+      <WhatsAppButton />
     </div>
   );
 };

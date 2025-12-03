@@ -1,4 +1,4 @@
-import { User, Estate, MarketplaceListing, RenovationOffer } from '@/types/models';
+import { User, Estate, MarketplaceListing, RenovationOffer, Auction } from '@/types/models';
 
 export const mockUsers: User[] = [
   {
@@ -38,6 +38,7 @@ export const mockEstates: Estate[] = [
     badge: 'cash-deal',
     timeLeftDays: 12,
     instantProfit: 1500000,
+    consensus: { accepted: 3, total: 4 },
     heirs: [
       { _id: 'heir_001', userId: 'user_001', userName: 'Ahmed Mohamed', relation: 'Son', sharePercentage: 40, shareValue: 2000000, vote: 'sell' },
       { _id: 'heir_002', userId: 'user_002', userName: 'Fatima Hassan', relation: 'Daughter', sharePercentage: 20, shareValue: 1000000, vote: 'sell' },
@@ -49,7 +50,7 @@ export const mockEstates: Estate[] = [
   },
   {
     _id: 'estate_002',
-    title: '200m² Villa in New Cairo - Fifth Settlement',
+    title: '200m² Villa in New Cairo',
     address: '42 Central Axis, Fifth Settlement',
     city: 'New Cairo',
     area: 200,
@@ -60,6 +61,7 @@ export const mockEstates: Estate[] = [
     badge: 'buyout-opportunity',
     timeLeftDays: 8,
     instantProfit: 1700000,
+    consensus: { accepted: 2, total: 4 },
     heirs: [
       { _id: 'heir_004', userId: 'user_005', userName: 'Mariam Khalil', relation: 'Wife', sharePercentage: 12.5, shareValue: 1062500, vote: 'sell' },
       { _id: 'heir_005', userId: 'user_006', userName: 'Hassan Khalil', relation: 'Son', sharePercentage: 43.75, shareValue: 3718750, vote: 'keep' },
@@ -83,6 +85,7 @@ export const mockEstates: Estate[] = [
     badge: 'cash-deal',
     timeLeftDays: 5,
     instantProfit: 550000,
+    consensus: { accepted: 2, total: 2 },
     heirs: [
       { _id: 'heir_008', userId: 'user_009', userName: 'Samir Abdel', relation: 'Brother', sharePercentage: 50, shareValue: 1100000, vote: 'sell' },
       { _id: 'heir_009', userId: 'user_010', userName: 'Hana Abdel', relation: 'Sister', sharePercentage: 50, shareValue: 1100000, vote: 'sell' },
@@ -93,7 +96,7 @@ export const mockEstates: Estate[] = [
   },
   {
     _id: 'estate_004',
-    title: '300m² Commercial Space in Downtown',
+    title: '300m² Commercial in Downtown',
     address: '25 Talaat Harb Street',
     city: 'Downtown Cairo',
     area: 300,
@@ -104,6 +107,7 @@ export const mockEstates: Estate[] = [
     badge: 'buyout-opportunity',
     timeLeftDays: 20,
     instantProfit: 3000000,
+    consensus: { accepted: 1, total: 4 },
     heirs: [
       { _id: 'heir_010', userId: 'user_011', userName: 'Karim Fathy', relation: 'Son', sharePercentage: 33.33, shareValue: 5000000, vote: 'pending' },
       { _id: 'heir_011', userId: 'user_012', userName: 'Dina Fathy', relation: 'Daughter', sharePercentage: 16.67, shareValue: 2500000, vote: 'pending' },
@@ -113,26 +117,6 @@ export const mockEstates: Estate[] = [
     images: ['/placeholder.svg'],
     createdAt: '2024-01-10T12:00:00Z',
     updatedAt: '2024-02-08T09:15:00Z',
-  },
-  {
-    _id: 'estate_005',
-    title: '500m² Land in 6th of October',
-    address: 'Plot 45, Industrial Zone',
-    city: '6th of October',
-    area: 500,
-    propertyType: 'land',
-    marketValuation: 3000000,
-    solhAskPrice: 2400000,
-    status: 'listed',
-    badge: 'cash-deal',
-    timeLeftDays: 15,
-    instantProfit: 600000,
-    heirs: [
-      { _id: 'heir_014', userId: 'user_015', userName: 'Mahmoud Saleh', relation: 'Son', sharePercentage: 100, shareValue: 3000000, vote: 'sell' },
-    ],
-    images: ['/placeholder.svg'],
-    createdAt: '2024-02-05T14:00:00Z',
-    updatedAt: '2024-02-12T10:30:00Z',
   },
 ];
 
@@ -155,7 +139,24 @@ export const mockMarketplaceListings: MarketplaceListing[] = mockEstates
     images: e.images,
     isLocked: true,
     depositRequired: 50000,
+    hasAuction: e._id === 'estate_001',
   }));
+
+export const mockAuctions: Auction[] = [
+  {
+    _id: 'auction_001',
+    listingId: 'listing_estate_001',
+    currentHighestBid: 3250000,
+    minimumBidIncrement: 50000,
+    bids: [
+      { _id: 'bid_001', investorId: 'inv_482', amount: 3250000, timestamp: '2024-02-10T14:30:00Z' },
+      { _id: 'bid_002', investorId: 'inv_318', amount: 3200000, timestamp: '2024-02-10T12:15:00Z' },
+      { _id: 'bid_003', investorId: 'inv_127', amount: 3150000, timestamp: '2024-02-10T10:00:00Z' },
+    ],
+    endsAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    status: 'active',
+  },
+];
 
 export const mockRenovationOffers: RenovationOffer[] = [
   {

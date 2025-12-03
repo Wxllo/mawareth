@@ -48,6 +48,17 @@ export const api = {
       }
       return false;
     },
+    updateConsensus: async (estateId: string, vote: 'accept' | 'reject'): Promise<boolean> => {
+      await delay(300);
+      const estate = mockEstates.find(e => e._id === estateId);
+      if (estate && estate.consensus) {
+        if (vote === 'accept') {
+          estate.consensus.accepted += 1;
+        }
+        return true;
+      }
+      return false;
+    },
   },
 
   // Marketplace
