@@ -29,7 +29,7 @@ export interface Estate {
   title: string;
   address: string;
   city: string;
-  area: number; // in square meters
+  area: number;
   propertyType: 'apartment' | 'villa' | 'land' | 'commercial';
   marketValuation: number;
   solhAskPrice: number;
@@ -41,6 +41,11 @@ export interface Estate {
   instantProfit?: number;
   createdAt: string;
   updatedAt: string;
+  // Consensus tracking
+  consensus?: {
+    accepted: number;
+    total: number;
+  };
 }
 
 export interface MarketplaceListing {
@@ -60,6 +65,9 @@ export interface MarketplaceListing {
   images: string[];
   isLocked: boolean;
   depositRequired: number;
+  // Auction data
+  hasAuction?: boolean;
+  auction?: Auction;
 }
 
 export interface RenovationOffer {
@@ -71,4 +79,40 @@ export interface RenovationOffer {
   valueIncrease: number;
   beforeImage: string;
   afterImage: string;
+}
+
+// Auction Types
+export interface AuctionBid {
+  _id: string;
+  investorId: string;
+  amount: number;
+  timestamp: string;
+}
+
+export interface Auction {
+  _id: string;
+  listingId: string;
+  currentHighestBid: number;
+  minimumBidIncrement: number;
+  bids: AuctionBid[];
+  endsAt: string;
+  status: 'active' | 'ended';
+}
+
+// Financing Types
+export interface LeasingCalculation {
+  loanAmount: number;
+  monthlyInstallment: number;
+  estimatedRent: number;
+  netPayment: number;
+  termMonths: number;
+}
+
+export interface FinancingOption {
+  type: 'standard' | 'murabaha';
+  assetPrice: number;
+  rate: number;
+  termMonths: number;
+  totalRepayment: number;
+  monthlyInstallment: number;
 }

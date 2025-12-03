@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Search, Filter, TrendingUp, Home } from "lucide-react";
+import { Building2, Search, Filter, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import { DealCard } from "@/components/marketplace/DealCard";
+import { ListingRow } from "@/components/marketplace/ListingRow";
 import { LockModal } from "@/components/marketplace/LockModal";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { api, formatEGP } from "@/services/api";
 import { MarketplaceListing } from "@/types/models";
 
@@ -21,7 +21,6 @@ const Marketplace = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [propertyType, setPropertyType] = useState<string>("all");
-  const [priceRange, setPriceRange] = useState<string>("all");
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -46,13 +45,8 @@ const Marketplace = () => {
       filtered = filtered.filter(l => l.propertyType === propertyType);
     }
 
-    if (priceRange !== "all") {
-      const [min, max] = priceRange.split("-").map(Number);
-      filtered = filtered.filter(l => l.askPrice >= min && l.askPrice <= max);
-    }
-
     setFilteredListings(filtered);
-  }, [searchTerm, propertyType, priceRange, listings]);
+  }, [searchTerm, propertyType, listings]);
 
   const handleViewDetails = (listing: MarketplaceListing) => {
     setSelectedListing(listing);
@@ -63,63 +57,47 @@ const Marketplace = () => {
     en: {
       title: "Solh Marketplace",
       subtitle: "Verified distressed assets at below-market prices",
-      searchPlaceholder: "Search by location or property...",
+      searchPlaceholder: "Search by location...",
       propertyType: "Property Type",
-      all: "All",
+      all: "All Types",
       apartment: "Apartment",
       villa: "Villa",
       land: "Land",
       commercial: "Commercial",
-      priceRange: "Price Range",
-      under2m: "Under 2M",
-      range2to5: "2M - 5M",
-      range5to10: "5M - 10M",
-      over10m: "Over 10M",
-      totalListings: "properties available",
+      totalListings: "properties",
       totalValue: "Total Value",
-      avgDiscount: "Avg. Discount",
     },
     ar: {
       title: "سوق الصلح",
       subtitle: "أصول موثقة بأسعار أقل من السوق",
-      searchPlaceholder: "ابحث بالموقع أو العقار...",
+      searchPlaceholder: "ابحث بالموقع...",
       propertyType: "نوع العقار",
-      all: "الكل",
+      all: "جميع الأنواع",
       apartment: "شقة",
       villa: "فيلا",
       land: "أرض",
       commercial: "تجاري",
-      priceRange: "نطاق السعر",
-      under2m: "أقل من 2 مليون",
-      range2to5: "2 - 5 مليون",
-      range5to10: "5 - 10 مليون",
-      over10m: "أكثر من 10 مليون",
-      totalListings: "عقار متاح",
+      totalListings: "عقار",
       totalValue: "القيمة الإجمالية",
-      avgDiscount: "متوسط الخصم",
     },
   };
 
   const t = content[language];
-
   const totalValue = filteredListings.reduce((sum, l) => sum + l.askPrice, 0);
-  const avgDiscount = filteredListings.length > 0 
-    ? Math.round(filteredListings.reduce((sum, l) => sum + l.profitPercentage, 0) / filteredListings.length)
-    : 0;
 
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="w-10 h-10 bg-emerald rounded-lg flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-emerald-foreground" />
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-primary-foreground" strokeWidth={1.5} />
               </div>
               <span className="text-xl font-bold text-foreground">Mawareth</span>
             </div>
-            <div className="flex gap-3">
+            <div className="flex items-center gap-4">
               <LanguageToggle />
               <Button variant="ghost" onClick={() => navigate('/calculator')}>
                 {language === 'ar' ? 'الحاسبة' : 'Calculator'}
@@ -133,29 +111,21 @@ const Marketplace = () => {
       </nav>
 
       {/* Header */}
-      <section className="py-12 bg-emerald">
+      <section className="py-8 border-b border-border">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-emerald-foreground mb-4">
-              {t.title}
-            </h1>
-            <p className="text-xl text-emerald-foreground/80 mb-8">
-              {t.subtitle}
-            </p>
+          <div className="max-w-4xl">
+            <h1 className="text-3xl font-bold text-foreground mb-2">{t.title}</h1>
+            <p className="text-muted-foreground mb-6">{t.subtitle}</p>
             
-            {/* Stats */}
-            <div className="flex justify-center gap-8">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-gold">{filteredListings.length}</p>
-                <p className="text-sm text-emerald-foreground/70">{t.totalListings}</p>
+            {/* Stats Row */}
+            <div className="flex gap-6 text-sm">
+              <div>
+                <span className="font-bold text-foreground">{filteredListings.length}</span>
+                <span className="text-muted-foreground ml-1">{t.totalListings}</span>
               </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold text-emerald-foreground">{formatEGP(totalValue)}</p>
-                <p className="text-sm text-emerald-foreground/70">{t.totalValue}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold text-success-green">{avgDiscount}%</p>
-                <p className="text-sm text-emerald-foreground/70">{t.avgDiscount}</p>
+              <div>
+                <span className="font-bold text-success-green">{formatEGP(totalValue)}</span>
+                <span className="text-muted-foreground ml-1">{t.totalValue}</span>
               </div>
             </div>
           </div>
@@ -163,22 +133,22 @@ const Marketplace = () => {
       </section>
 
       {/* Filters */}
-      <section className="py-6 border-b border-border bg-card">
+      <section className="py-4 border-b border-border bg-card">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap gap-4 items-center">
-            <div className="flex-1 min-w-[200px]">
+            <div className="flex-1 min-w-[200px] max-w-md">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input 
                   placeholder={t.searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-12"
                 />
               </div>
             </div>
             <Select value={propertyType} onValueChange={setPropertyType}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px] h-12">
                 <Home className="w-4 h-4 mr-2" />
                 <SelectValue placeholder={t.propertyType} />
               </SelectTrigger>
@@ -190,29 +160,16 @@ const Marketplace = () => {
                 <SelectItem value="commercial">{t.commercial}</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={priceRange} onValueChange={setPriceRange}>
-              <SelectTrigger className="w-[180px]">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                <SelectValue placeholder={t.priceRange} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t.all}</SelectItem>
-                <SelectItem value="0-2000000">{t.under2m}</SelectItem>
-                <SelectItem value="2000000-5000000">{t.range2to5}</SelectItem>
-                <SelectItem value="5000000-10000000">{t.range5to10}</SelectItem>
-                <SelectItem value="10000000-100000000">{t.over10m}</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
       </section>
 
-      {/* Listings Grid */}
-      <section className="py-12">
+      {/* Listings - List View */}
+      <section className="py-8">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="space-y-4 max-w-5xl">
             {filteredListings.map((listing) => (
-              <DealCard 
+              <ListingRow 
                 key={listing._id} 
                 listing={listing} 
                 onViewDetails={handleViewDetails}
@@ -243,17 +200,19 @@ const Marketplace = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-emerald rounded-lg flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-emerald-foreground" />
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-primary-foreground" strokeWidth={1.5} />
               </div>
               <span className="font-semibold text-foreground">Mawareth</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2025 Mawareth. {language === 'ar' ? 'تبسيط الميراث في مصر' : 'Simplifying inheritance in Egypt.'}
+              © 2025 Mawareth. {language === 'ar' ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
             </p>
           </div>
         </div>
       </footer>
+
+      <WhatsAppButton />
     </div>
   );
 };
