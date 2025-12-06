@@ -1,9 +1,34 @@
 // MongoDB-style data models for easy backend migration
+// All IDs use MongoDB ObjectId pattern (_id: string)
 
 export type UserRole = 'heir' | 'investor';
 export type EstateStatus = 'disputed' | 'voting' | 'listed' | 'sold';
 export type VoteType = 'sell' | 'keep' | 'pending';
 export type DealBadge = 'cash-deal' | 'buyout-opportunity';
+export type FinancingType = 'standard' | 'murabaha';
+export type BuyoutStatus = 'pending' | 'approved' | 'approved-with-leasing' | 'rejected';
+
+// Authentication Models (MongoDB-ready)
+export interface AuthUser {
+  _id: string;
+  email: string;
+  passwordHash?: string; // Will be hashed on backend
+  name: string;
+  phone: string;
+  role: UserRole;
+  nationalId?: string;
+  isVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthSession {
+  _id: string;
+  userId: string;
+  token: string;
+  expiresAt: string;
+  createdAt: string;
+}
 
 export interface User {
   _id: string;
@@ -109,10 +134,51 @@ export interface LeasingCalculation {
 }
 
 export interface FinancingOption {
-  type: 'standard' | 'murabaha';
+  type: FinancingType;
   assetPrice: number;
   rate: number;
   termMonths: number;
   totalRepayment: number;
   monthlyInstallment: number;
+}
+
+// Family Buyout Application (MongoDB-ready)
+export interface BuyoutApplication {
+  _id: string;
+  userId: string;
+  estateId?: string;
+  
+  // Financing Details
+  financingType: FinancingType;
+  shareValue: number;
+  monthlyIncome: number;
+  repaymentPeriodMonths: number;
+  
+  // Calculated Values
+  monthlyInstallment: number;
+  dtiRatio: number;
+  
+  // Leasing Details (if applicable)
+  requiresLeasing: boolean;
+  estimatedRent?: number;
+  netPayment?: number;
+  
+  // Status
+  status: BuyoutStatus;
+  
+  // Timestamps (MongoDB pattern)
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Murabaha-specific details
+export interface MurabahaDetails {
+  _id: string;
+  applicationId: string;
+  costPrice: number;
+  profitMargin: number;
+  totalPrice: number;
+  possessionDate: string;
+  titleTransferDate?: string;
+  isCompleted: boolean;
 }
