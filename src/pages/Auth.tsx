@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -9,15 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, User, Briefcase } from 'lucide-react';
+import { Loader2, User, Briefcase, ShieldCheck } from 'lucide-react';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { AppFooter } from '@/components/layout/AppFooter';
 
 const Auth: React.FC = () => {
   const { language } = useLanguage();
-  const { login, signup } = useAuth();
+  const { login, signup, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const isArabic = language === 'ar';
+  const location = useLocation();
 
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -29,6 +29,14 @@ const Auth: React.FC = () => {
     phone: '',
     role: 'heir' as 'heir' | 'investor' | 'admin'
   });
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
 
   const content = {
     en: {
@@ -44,6 +52,8 @@ const Auth: React.FC = () => {
       heirDesc: 'I inherited property',
       investor: 'Investor',
       investorDesc: 'I want to invest',
+      admin: 'Administrator',
+      adminDesc: 'Manage platform',
       loginBtn: 'Sign In',
       signupBtn: 'Create Account',
       loginDesc: 'Welcome back! Sign in to your account.',
@@ -67,6 +77,8 @@ const Auth: React.FC = () => {
       heirDesc: 'ورثت عقاراً',
       investor: 'مستثمر',
       investorDesc: 'أريد الاستثمار',
+      admin: 'مسؤول',
+      adminDesc: 'إدارة المنصة',
       loginBtn: 'دخول',
       signupBtn: 'إنشاء حساب',
       loginDesc: 'مرحباً بعودتك! سجل دخولك.',
@@ -89,7 +101,8 @@ const Auth: React.FC = () => {
 
     if (result.success) {
       toast({ title: t.loginSuccess });
-      navigate('/dashboard');
+      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
     } else {
       toast({ title: t.loginError, description: result.error, variant: 'destructive' });
     }
@@ -125,14 +138,20 @@ const Auth: React.FC = () => {
     setIsLoading(false);
   };
 
+  const roleOptions = [
+    { value: 'heir', label: t.heir, desc: t.heirDesc, icon: User },
+    { value: 'investor', label: t.investor, desc: t.investorDesc, icon: Briefcase },
+    { value: 'admin', label: t.admin, desc: t.adminDesc, icon: ShieldCheck }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <AppHeader />
       
       <main className="flex-1 flex items-center justify-center py-12 px-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md border-border/50 shadow-lg">
           <Tabs defaultValue="login">
-            <CardHeader>
+            <CardHeader className="pb-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">{t.login}</TabsTrigger>
                 <TabsTrigger value="signup">{t.signup}</TabsTrigger>
@@ -140,7 +159,7 @@ const Auth: React.FC = () => {
             </CardHeader>
 
             <CardContent>
-              <TabsContent value="login">
+              <TabsContent value="login" className="mt-0">
                 <CardTitle className="text-xl mb-2">{t.login}</CardTitle>
                 <CardDescription className="mb-6">{t.loginDesc}</CardDescription>
                 
@@ -154,6 +173,7 @@ const Auth: React.FC = () => {
                       onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                       required
                       dir="ltr"
+                      className="bg-background"
                     />
                   </div>
                   
@@ -166,6 +186,7 @@ const Auth: React.FC = () => {
                       onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                       required
                       dir="ltr"
+                      className="bg-background"
                     />
                   </div>
 
@@ -175,7 +196,7 @@ const Auth: React.FC = () => {
                 </form>
               </TabsContent>
 
-              <TabsContent value="signup">
+              <TabsContent value="signup" className="mt-0">
                 <CardTitle className="text-xl mb-2">{t.signup}</CardTitle>
                 <CardDescription className="mb-6">{t.signupDesc}</CardDescription>
                 
@@ -187,6 +208,7 @@ const Auth: React.FC = () => {
                       value={signupData.name}
                       onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
                       required
+                      className="bg-background"
                     />
                   </div>
 
@@ -199,6 +221,7 @@ const Auth: React.FC = () => {
                       onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
                       required
                       dir="ltr"
+                      className="bg-background"
                     />
                   </div>
 
@@ -211,6 +234,7 @@ const Auth: React.FC = () => {
                       onChange={(e) => setSignupData({ ...signupData, phone: e.target.value })}
                       required
                       dir="ltr"
+                      className="bg-background"
                     />
                   </div>
                   
@@ -223,6 +247,7 @@ const Auth: React.FC = () => {
                       onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                       required
                       dir="ltr"
+                      className="bg-background"
                     />
                   </div>
 
@@ -235,6 +260,7 @@ const Auth: React.FC = () => {
                       onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
                       required
                       dir="ltr"
+                      className="bg-background"
                     />
                   </div>
 
@@ -242,32 +268,25 @@ const Auth: React.FC = () => {
                     <Label>{t.role}</Label>
                     <RadioGroup
                       value={signupData.role}
-                      onValueChange={(value: 'heir' | 'investor') => setSignupData({ ...signupData, role: value })}
-                      className="grid grid-cols-2 gap-4"
+                      onValueChange={(value: 'heir' | 'investor' | 'admin') => setSignupData({ ...signupData, role: value })}
+                      className="grid grid-cols-3 gap-3"
                     >
-                      <Label
-                        htmlFor="role-heir"
-                        className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-                          signupData.role === 'heir' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                        }`}
-                      >
-                        <RadioGroupItem value="heir" id="role-heir" className="sr-only" />
-                        <User className="h-6 w-6 text-primary" />
-                        <span className="font-medium">{t.heir}</span>
-                        <span className="text-xs text-muted-foreground text-center">{t.heirDesc}</span>
-                      </Label>
-                      
-                      <Label
-                        htmlFor="role-investor"
-                        className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-                          signupData.role === 'investor' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                        }`}
-                      >
-                        <RadioGroupItem value="investor" id="role-investor" className="sr-only" />
-                        <Briefcase className="h-6 w-6 text-primary" />
-                        <span className="font-medium">{t.investor}</span>
-                        <span className="text-xs text-muted-foreground text-center">{t.investorDesc}</span>
-                      </Label>
+                      {roleOptions.map((option) => (
+                        <Label
+                          key={option.value}
+                          htmlFor={`role-${option.value}`}
+                          className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                            signupData.role === option.value 
+                              ? 'border-primary bg-primary/5 shadow-sm' 
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <RadioGroupItem value={option.value} id={`role-${option.value}`} className="sr-only" />
+                          <option.icon className={`h-5 w-5 ${signupData.role === option.value ? 'text-primary' : 'text-muted-foreground'}`} />
+                          <span className="font-medium text-sm">{option.label}</span>
+                          <span className="text-[10px] text-muted-foreground text-center leading-tight">{option.desc}</span>
+                        </Label>
+                      ))}
                     </RadioGroup>
                   </div>
 
