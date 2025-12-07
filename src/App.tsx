@@ -17,12 +17,13 @@ import Marketplace from "./pages/Marketplace";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import Finance from "./pages/Finance";
+import Admin from "./pages/Admin";
+import SubmitListing from "./pages/SubmitListing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  console.log('App rendering');
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
@@ -44,6 +45,8 @@ const App = () => {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/finance" element={<Finance />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/submit-listing" element={<SubmitListing />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

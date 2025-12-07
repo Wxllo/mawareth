@@ -1,7 +1,7 @@
 // MongoDB-style data models for easy backend migration
 // All IDs use MongoDB ObjectId pattern (_id: string)
 
-export type UserRole = 'heir' | 'investor';
+export type UserRole = 'heir' | 'investor' | 'admin';
 export type EstateStatus = 'disputed' | 'voting' | 'listed' | 'sold';
 export type VoteType = 'sell' | 'keep' | 'pending';
 export type DealBadge = 'cash-deal' | 'buyout-opportunity';

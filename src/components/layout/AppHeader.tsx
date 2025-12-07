@@ -1,15 +1,24 @@
-import { Building2, Menu, X } from "lucide-react";
+import { Building2, Menu, X, User, LogOut, Shield } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const AppHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { language } = useLanguage();
+  const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -19,6 +28,12 @@ export const AppHeader = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+  const isAdmin = user?.role === 'admin';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
@@ -51,17 +66,60 @@ export const AppHeader = () => {
                 {language === 'ar' ? item.labelAr : item.labelEn}
               </button>
             ))}
+            {isAdmin && (
+              <button
+                onClick={() => navigate('/admin')}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1",
+                  isActive('/admin')
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                <Shield className="w-4 h-4" />
+                {language === 'ar' ? 'الإدارة' : 'Admin'}
+              </button>
+            )}
           </nav>
 
           {/* Right Side */}
           <div className="flex items-center gap-3">
             <LanguageToggle />
-            <Button 
-              onClick={() => navigate('/dashboard')}
-              className="hidden sm:flex bg-primary hover:bg-primary/90 text-primary-foreground h-10"
-            >
-              {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
-            </Button>
+            
+            {isAuthenticated && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="hidden sm:flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    <span className="max-w-[100px] truncate">{user.name}</span>
+                    {isAdmin && <Shield className="w-3 h-3 text-primary" />}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                    {language === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem onClick={() => navigate('/admin')}>
+                      <Shield className="w-4 h-4 mr-2" />
+                      {language === 'ar' ? 'لوحة الإدارة' : 'Admin Panel'}
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    {language === 'ar' ? 'تسجيل الخروج' : 'Logout'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="hidden sm:flex bg-primary hover:bg-primary/90 text-primary-foreground h-10"
+              >
+                {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+              </Button>
+            )}
 
             {/* Mobile Menu Toggle */}
             <button
@@ -94,15 +152,46 @@ export const AppHeader = () => {
                   {language === 'ar' ? item.labelAr : item.labelEn}
                 </button>
               ))}
-              <Button 
-                onClick={() => {
-                  navigate('/dashboard');
-                  setMobileMenuOpen(false);
-                }}
-                className="mt-2 bg-primary hover:bg-primary/90 text-primary-foreground h-12"
-              >
-                {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
-              </Button>
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    navigate('/admin');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={cn(
+                    "px-4 py-3 rounded-lg text-sm font-medium transition-colors text-left flex items-center gap-2",
+                    isActive('/admin')
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Shield className="w-4 h-4" />
+                  {language === 'ar' ? 'الإدارة' : 'Admin'}
+                </button>
+              )}
+              {isAuthenticated ? (
+                <Button 
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                  variant="outline"
+                  className="mt-2 h-12"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  {language === 'ar' ? 'تسجيل الخروج' : 'Logout'}
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => {
+                    navigate('/auth');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="mt-2 bg-primary hover:bg-primary/90 text-primary-foreground h-12"
+                >
+                  {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+                </Button>
+              )}
             </nav>
           </div>
         )}

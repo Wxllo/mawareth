@@ -27,7 +27,7 @@ const Auth: React.FC = () => {
     confirmPassword: '',
     name: '',
     phone: '',
-    role: 'heir' as 'heir' | 'investor'
+    role: 'heir' as 'heir' | 'investor' | 'admin'
   });
 
   const content = {

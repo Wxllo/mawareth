@@ -36,7 +36,7 @@ export const ServiceGrid = () => {
       titleAr: "شراء حصص الورثة",
       subtextEn: "Finance the purchase of other heirs' shares through Sharia-compliant Murabaha.",
       subtextAr: "موّل شراء حصص الورثة الآخرين من خلال المرابحة الإسلامية.",
-      path: "/loan-application",
+      path: "/finance",
       color: "accent",
     },
     {
