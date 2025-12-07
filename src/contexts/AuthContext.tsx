@@ -16,7 +16,7 @@ interface SignupData {
   password: string;
   name: string;
   phone: string;
-  role: 'heir' | 'investor';
+  role: 'heir' | 'investor' | 'admin';
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

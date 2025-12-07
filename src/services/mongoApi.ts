@@ -72,7 +72,7 @@ interface SignupData {
   password: string;
   name: string;
   phone: string;
-  role: 'heir' | 'investor';
+  role: 'heir' | 'investor' | 'admin';
 }
 
 // ==================== AUTH API ====================

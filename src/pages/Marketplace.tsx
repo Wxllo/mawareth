@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter, Home } from "lucide-react";
+import { Search, Filter, Home, Plus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ListingRow } from "@/components/marketplace/ListingRow";
 import { LockModal } from "@/components/marketplace/LockModal";
@@ -11,6 +14,8 @@ import { MarketplaceListing } from "@/types/models";
 
 const Marketplace = () => {
   const { language } = useLanguage();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [filteredListings, setFilteredListings] = useState<MarketplaceListing[]>([]);
   const [selectedListing, setSelectedListing] = useState<MarketplaceListing | null>(null);
@@ -21,8 +26,13 @@ const Marketplace = () => {
   useEffect(() => {
     const fetchListings = async () => {
       const data = await api.marketplace.getAll();
-      setListings(data);
-      setFilteredListings(data);
+      
+      // Also get approved user listings from localStorage
+      const userListings = JSON.parse(localStorage.getItem('merath_marketplace_listings') || '[]');
+      const allListings = [...data, ...userListings];
+      
+      setListings(allListings);
+      setFilteredListings(allListings);
     };
     fetchListings();
   }, []);
@@ -63,6 +73,7 @@ const Marketplace = () => {
       totalListings: "properties",
       totalValue: "Total Value",
       noResults: "No results found",
+      submitListing: "List Your Property",
     },
     ar: {
       title: "سوق الصلح",
@@ -77,6 +88,7 @@ const Marketplace = () => {
       totalListings: "عقار",
       totalValue: "القيمة الإجمالية",
       noResults: "لا توجد نتائج",
+      submitListing: "اعرض عقارك",
     },
   };
 
@@ -88,21 +100,32 @@ const Marketplace = () => {
       {/* Header */}
       <section className="py-8 md:py-12 border-b border-border bg-card">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{t.title}</h1>
-            <p className="text-lg text-muted-foreground mb-6">{t.subtitle}</p>
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="max-w-4xl">
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{t.title}</h1>
+              <p className="text-lg text-muted-foreground mb-6">{t.subtitle}</p>
 
-            {/* Stats Row */}
-            <div className="flex gap-8 text-sm">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-foreground">{filteredListings.length}</span>
-                <span className="text-muted-foreground">{t.totalListings}</span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-success-green">{formatEGP(totalValue)}</span>
-                <span className="text-muted-foreground">{t.totalValue}</span>
+              {/* Stats Row */}
+              <div className="flex gap-8 text-sm">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-foreground">{filteredListings.length}</span>
+                  <span className="text-muted-foreground">{t.totalListings}</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-success-green">{formatEGP(totalValue)}</span>
+                  <span className="text-muted-foreground">{t.totalValue}</span>
+                </div>
               </div>
             </div>
+
+            {/* Submit Listing Button */}
+            <Button 
+              onClick={() => navigate(isAuthenticated ? '/submit-listing' : '/auth')}
+              className="bg-accent hover:bg-accent/90 text-accent-foreground h-12 px-6"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {t.submitListing}
+            </Button>
           </div>
         </div>
       </section>

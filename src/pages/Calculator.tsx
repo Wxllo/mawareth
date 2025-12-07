@@ -239,7 +239,17 @@ const Calculator = () => {
                     <Button variant="outline" className="flex-1 h-12" onClick={handleNewCalculation}>
                       {t.newCalc}
                     </Button>
-                    <Button variant="outline" className="flex-1 h-12">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 h-12"
+                      onClick={() => {
+                        if (calculationResult) {
+                          import('@/lib/pdfGenerator').then(({ generatePDF }) => {
+                            generatePDF(calculationResult);
+                          });
+                        }
+                      }}
+                    >
                       <FileText className="w-4 h-4 mr-2" />
                       {t.savePdf}
                     </Button>
